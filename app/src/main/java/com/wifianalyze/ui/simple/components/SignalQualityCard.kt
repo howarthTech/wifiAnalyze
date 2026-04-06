@@ -1,15 +1,22 @@
 package com.wifianalyze.ui.simple.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SignalWifi0Bar
 import androidx.compose.material.icons.rounded.SignalWifi4Bar
@@ -26,7 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,6 +47,7 @@ fun SignalQualityCard(
     signalPercent: Float,
     signalColor: Color,
     isConnected: Boolean,
+    isScanning: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val animatedColor by animateColorAsState(
@@ -49,6 +59,18 @@ fun SignalQualityCard(
         targetValue = signalPercent,
         animationSpec = tween(500),
         label = "signalProgress"
+    )
+
+    // Subtle pulse when scanning
+    val infiniteTransition = rememberInfiniteTransition(label = "scanning")
+    val scanAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scanPulse"
     )
 
     Card(
@@ -67,7 +89,9 @@ fun SignalQualityCard(
             Icon(
                 imageVector = wifiIcon(quality, isConnected),
                 contentDescription = quality.label,
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier
+                    .size(72.dp)
+                    .then(if (isScanning) Modifier.alpha(scanAlpha) else Modifier),
                 tint = animatedColor
             )
 
@@ -90,14 +114,33 @@ fun SignalQualityCard(
 
             if (isConnected) {
                 Spacer(modifier = Modifier.height(16.dp))
+
                 LinearProgressIndicator(
                     progress = { animatedProgress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp),
+                        .height(10.dp),
                     color = animatedColor,
                     trackColor = animatedColor.copy(alpha = 0.2f),
+                    strokeCap = StrokeCap.Round
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Scanning status
+                if (isScanning) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.alpha(scanAlpha)
+                    ) {
+                        Text(
+                            text = "Scanning...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }

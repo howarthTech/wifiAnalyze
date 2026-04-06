@@ -8,13 +8,16 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -62,22 +66,23 @@ fun PermissionScreen(
         Icon(
             imageVector = Icons.Rounded.Wifi,
             contentDescription = null,
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier.size(88.dp),
             tint = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = "WiFi Analyze",
             style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Check your WiFi signal strength and find the best spots for your smart devices",
+            text = "Find the best spots in your home for smart devices and WiFi coverage",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -93,17 +98,19 @@ fun PermissionScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "This app needs permission to:",
-                    style = MaterialTheme.typography.titleSmall
+                    text = "To scan WiFi networks, this app needs:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                PermissionBullet("Scan for nearby WiFi networks")
+                Spacer(modifier = Modifier.height(6.dp))
+                PermissionBullet("Location access (required by Android to scan WiFi)")
+
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "\u2022 Scan for nearby WiFi networks\n\u2022 Access your location (required by Android to scan WiFi)",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Your location data stays on your device and is never shared.",
+                    text = "Your data stays on your device and is never shared or uploaded.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -114,7 +121,7 @@ fun PermissionScreen(
 
         if (permanentlyDenied) {
             Text(
-                text = "Permissions were denied. Please enable them in Settings to use this app.",
+                text = "Permissions were denied. Please enable them in your phone's Settings to use this app.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.error
@@ -126,7 +133,8 @@ fun PermissionScreen(
                         data = Uri.fromParts("package", context.packageName, null)
                     }
                     context.startActivity(intent)
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Open Settings")
             }
@@ -140,10 +148,32 @@ fun PermissionScreen(
                         )
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
             ) {
-                Text("Allow WiFi Scanning")
+                Text(
+                    "Get Started",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun PermissionBullet(text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Rounded.CheckCircle,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }

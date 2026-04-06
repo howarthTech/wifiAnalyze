@@ -8,12 +8,14 @@ import com.wifianalyze.data.wifi.ConnectionInfoProvider
 import com.wifianalyze.data.wifi.WifiScanner
 import com.wifianalyze.domain.CongestionAnalyzer
 import com.wifianalyze.domain.IoTReadinessChecker
+import com.wifianalyze.domain.NetworkOptimizer
 import com.wifianalyze.domain.SignalMapper
 import com.wifianalyze.domain.TipEngine
 import com.wifianalyze.domain.model.BandSignalInfo
 import com.wifianalyze.domain.model.CongestionLevel
 import com.wifianalyze.domain.model.ConnectionInfo
 import com.wifianalyze.domain.model.IoTReadiness
+import com.wifianalyze.domain.model.Recommendation
 import com.wifianalyze.domain.model.RoomReading
 import com.wifianalyze.domain.model.SignalQuality
 import com.wifianalyze.domain.model.WifiBand
@@ -30,17 +32,33 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class NearbyNetworkInfo(
+    val ssid: String,
+    val quality: SignalQuality,
+    val band: WifiBand,
+    val channel: Int,
+    val rssi: Int,
+    val security: String,
+    val isYourNetwork: Boolean
+)
+
 data class SimpleUiState(
     val isConnected: Boolean = false,
     val ssid: String = "",
+    val rssi: Int = -100,
     val quality: SignalQuality = SignalQuality.NO_SIGNAL,
     val signalPercent: Float = 0f,
     val signalColor: androidx.compose.ui.graphics.Color = SignalQuality.NO_SIGNAL.color,
     val band: WifiBand = WifiBand.UNKNOWN,
+    val channel: Int = 0,
+    val frequency: Int = 0,
     val bandSignals: List<BandSignalInfo> = emptyList(),
     val iotReadiness: IoTReadiness = IoTReadiness(false, "Checking..."),
     val competingNetworks: Int = 0,
+    val topCompetingNames: List<String> = emptyList(),
+    val nearbyNetworks: List<NearbyNetworkInfo> = emptyList(),
     val congestion: CongestionLevel = CongestionLevel.LOW,
+    val recommendations: List<Recommendation> = emptyList(),
     val tips: List<String> = emptyList(),
     val isScanning: Boolean = false
 )
@@ -52,6 +70,7 @@ class SimpleViewModel @Inject constructor(
     private val signalMapper: SignalMapper,
     private val congestionAnalyzer: CongestionAnalyzer,
     private val iotReadinessChecker: IoTReadinessChecker,
+    private val networkOptimizer: NetworkOptimizer,
     private val tipEngine: TipEngine,
     private val roomReadingDao: RoomReadingDao
 ) : ViewModel() {
@@ -103,12 +122,19 @@ class SimpleViewModel @Inject constructor(
         val color = signalMapper.signalColor(connection.rssi)
         val percent = signalMapper.signalPercentage(connection.rssi)
         val competing = congestionAnalyzer.countCompetingNetworks(networks, connection.ssid)
+        val topNames = networks
+            .filter { it.ssid != connection.ssid && it.ssid.isNotBlank() }
+            .distinctBy { it.ssid }
+            .sortedByDescending { it.rssi }
+            .take(5)
+            .map { it.ssid }
         val congestion = congestionAnalyzer.analyzeCongestion(networks, connection.ssid)
         val iot = if (connection.isConnected) {
             iotReadinessChecker.check(networks, connection.ssid)
         } else {
             IoTReadiness(false, "Connect to WiFi to check IoT readiness")
         }
+        val recs = networkOptimizer.analyze(connection, networks)
         val tips = tipEngine.generateTips(connection, networks)
 
         // Build per-band signal info for this network from scan results
@@ -118,18 +144,42 @@ class SimpleViewModel @Inject constructor(
             emptyList()
         }
 
+        // Build nearby networks list — group by SSID, take the strongest signal per SSID
+        val nearby = networks
+            .filter { it.ssid.isNotBlank() }
+            .groupBy { it.ssid }
+            .map { (ssid, entries) ->
+                val best = entries.maxBy { it.rssi }
+                NearbyNetworkInfo(
+                    ssid = ssid,
+                    quality = signalMapper.mapSignalQuality(best.rssi),
+                    band = best.band,
+                    channel = best.channel,
+                    rssi = best.rssi,
+                    security = parseSecurityType(best.capabilities),
+                    isYourNetwork = ssid == connection.ssid
+                )
+            }
+            .sortedByDescending { it.rssi }
+
         _uiState.update {
             SimpleUiState(
                 isConnected = connection.isConnected,
                 ssid = connection.ssid,
+                rssi = connection.rssi,
                 quality = quality,
                 signalPercent = percent,
                 signalColor = color,
                 band = connection.band,
+                channel = connection.channel,
+                frequency = connection.frequency,
                 bandSignals = bandSignals,
                 iotReadiness = iot,
                 competingNetworks = competing,
+                topCompetingNames = topNames,
+                nearbyNetworks = nearby,
                 congestion = congestion,
+                recommendations = recs,
                 tips = tips,
                 isScanning = scanning
             )
@@ -160,6 +210,11 @@ class SimpleViewModel @Inject constructor(
         }
     }
 
+    fun refresh() {
+        wifiScanner.startScan()
+        connectionInfoProvider.refreshConnectionInfo()
+    }
+
     fun saveRoomReading(roomName: String) {
         viewModelScope.launch {
             val state = _uiState.value
@@ -167,10 +222,10 @@ class SimpleViewModel @Inject constructor(
 
             val entity = RoomReadingEntity(
                 roomName = roomName,
-                rssi = (state.signalPercent * 50 - 90).toInt(),
+                rssi = state.rssi,
                 ssid = state.ssid,
-                frequency = 0,
-                channel = 0,
+                frequency = state.frequency,
+                channel = state.channel,
                 band = state.band.label,
                 quality = state.quality.name,
                 competingNetworks = state.competingNetworks,
@@ -229,4 +284,16 @@ class SimpleViewModel @Inject constructor(
         iotReady = iotReady,
         timestamp = timestamp
     )
+
+    private fun parseSecurityType(capabilities: String): String {
+        return when {
+            capabilities.contains("WPA3") -> "WPA3"
+            capabilities.contains("WPA2") && capabilities.contains("WPA3") -> "WPA2/WPA3"
+            capabilities.contains("WPA2") -> "WPA2"
+            capabilities.contains("WPA") -> "WPA"
+            capabilities.contains("WEP") -> "WEP"
+            capabilities.contains("ESS") && !capabilities.contains("WPA") && !capabilities.contains("WEP") -> "Open"
+            else -> "Unknown"
+        }
+    }
 }

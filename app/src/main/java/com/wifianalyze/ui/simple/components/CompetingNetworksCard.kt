@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
@@ -24,6 +25,7 @@ import com.wifianalyze.domain.model.CongestionLevel
 fun CompetingNetworksCard(
     count: Int,
     congestion: CongestionLevel,
+    topNetworkNames: List<String> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -32,39 +34,54 @@ fun CompetingNetworksCard(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Column {
-                Text(
-                    text = "$count other network${if (count != 1) "s" else ""} nearby",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "Network congestion",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "$count other network${if (count != 1) "s" else ""} nearby",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "Network congestion",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                SuggestionChip(
+                    onClick = {},
+                    label = {
+                        Text(
+                            text = congestion.label,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = congestion.color.copy(alpha = 0.15f),
+                        labelColor = congestion.color
+                    )
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            SuggestionChip(
-                onClick = {},
-                label = {
-                    Text(
-                        text = congestion.label,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = congestion.color.copy(alpha = 0.15f),
-                    labelColor = congestion.color
+
+            // Show top competing network names
+            if (topNetworkNames.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = topNetworkNames.joinToString(", "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    maxLines = 2
                 )
-            )
+            }
         }
     }
 }
