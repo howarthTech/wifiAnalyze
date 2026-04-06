@@ -139,7 +139,12 @@ class ConnectionInfoProvider @Inject constructor(
         }
 
         val freq = wifiInfo.frequency
-        val ipAddress = getIpAddress(network)
+        val networkDetails = getNetworkDetails(network)
+        val ipAddress = networkDetails.ipAddress
+
+        // TX/RX link speeds (API 30+)
+        val txSpeed = wifiInfo.txLinkSpeedMbps
+        val rxSpeed = wifiInfo.rxLinkSpeedMbps
 
         // Even if SSID is unknown, we're still connected if we have an IP and WiFi transport
         val isConnected = if (ssid.isNotBlank() && ssid != "<unknown ssid>") {
@@ -166,19 +171,47 @@ class ConnectionInfoProvider @Inject constructor(
             channel = ChannelHelper.frequencyToChannel(freq),
             band = ChannelHelper.frequencyToBand(freq),
             ipAddress = ipAddress,
+            gateway = networkDetails.gateway,
+            dnsServers = networkDetails.dnsServers,
+            subnetPrefixLength = networkDetails.subnetPrefixLength,
+            txLinkSpeedMbps = txSpeed,
+            rxLinkSpeedMbps = rxSpeed,
             isConnected = isConnected
         )
     }
 
-    private fun getIpAddress(network: Network): String {
+    private data class NetworkDetails(
+        val ipAddress: String,
+        val gateway: String,
+        val dnsServers: List<String>,
+        val subnetPrefixLength: Int
+    )
+
+    private fun getNetworkDetails(network: Network): NetworkDetails {
         return try {
             val linkProperties = connectivityManager.getLinkProperties(network)
-            linkProperties?.linkAddresses
+
+            val ipAddress = linkProperties?.linkAddresses
                 ?.firstOrNull { it.address is Inet4Address }
                 ?.address
                 ?.hostAddress ?: ""
+
+            val subnetPrefix = linkProperties?.linkAddresses
+                ?.firstOrNull { it.address is Inet4Address }
+                ?.prefixLength ?: 0
+
+            val gateway = linkProperties?.routes
+                ?.firstOrNull { it.isDefaultRoute }
+                ?.gateway
+                ?.hostAddress ?: ""
+
+            val dnsServers = linkProperties?.dnsServers
+                ?.mapNotNull { it.hostAddress }
+                ?: emptyList()
+
+            NetworkDetails(ipAddress, gateway, dnsServers, subnetPrefix)
         } catch (e: SecurityException) {
-            ""
+            NetworkDetails("", "", emptyList(), 0)
         }
     }
 }
