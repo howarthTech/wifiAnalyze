@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.wifianalyze.ui.simple.components.CompetingNetworksCard
 import com.wifianalyze.ui.simple.components.IoTReadinessCard
 import com.wifianalyze.ui.simple.components.NearbyNetworksCard
 import com.wifianalyze.ui.simple.components.RecommendationsCard
@@ -129,11 +128,12 @@ fun SimpleDashboardScreen(
                         signalPercent = state.signalPercent,
                         signalColor = state.signalColor,
                         isConnected = state.isConnected,
-                        isScanning = state.isScanning
+                        isScanning = state.isScanning,
+                        isInitializing = state.isInitializing
                     )
                 }
 
-                if (state.isConnected) {
+                if (state.isConnected && !state.isInitializing) {
                     item {
                         YourNetworkBandsCard(
                             bandSignals = state.bandSignals,
@@ -146,16 +146,10 @@ fun SimpleDashboardScreen(
                     }
 
                     item {
-                        CompetingNetworksCard(
-                            count = state.competingNetworks,
-                            congestion = state.congestion,
-                            topNetworkNames = state.topCompetingNames
-                        )
-                    }
-
-                    item {
                         NearbyNetworksCard(
-                            networks = state.nearbyNetworks
+                            networks = state.nearbyNetworks,
+                            competingCount = state.competingNetworks,
+                            congestion = state.congestion
                         )
                     }
 

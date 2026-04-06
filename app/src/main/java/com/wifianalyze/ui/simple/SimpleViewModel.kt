@@ -43,6 +43,7 @@ data class NearbyNetworkInfo(
 )
 
 data class SimpleUiState(
+    val isInitializing: Boolean = true,
     val isConnected: Boolean = false,
     val ssid: String = "",
     val rssi: Int = -100,
@@ -84,6 +85,12 @@ class SimpleViewModel @Inject constructor(
     init {
         startMonitoring()
         observeData()
+
+        // Give WiFi scan time to return results before showing any negative state
+        viewModelScope.launch {
+            delay(3_000)
+            _uiState.update { it.copy(isInitializing = false) }
+        }
     }
 
     private fun startMonitoring() {
@@ -162,8 +169,13 @@ class SimpleViewModel @Inject constructor(
             }
             .sortedByDescending { it.rssi }
 
+        // Clear initializing only once we have both connection AND scan results
+        val hasScanData = networks.isNotEmpty()
+        val stillInitializing = _uiState.value.isInitializing && !(connection.isConnected && hasScanData)
+
         _uiState.update {
             SimpleUiState(
+                isInitializing = stillInitializing,
                 isConnected = connection.isConnected,
                 ssid = connection.ssid,
                 rssi = connection.rssi,

@@ -48,6 +48,7 @@ fun SignalQualityCard(
     signalColor: Color,
     isConnected: Boolean,
     isScanning: Boolean = false,
+    isInitializing: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val animatedColor by animateColorAsState(
@@ -87,27 +88,35 @@ fun SignalQualityCard(
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = wifiIcon(quality, isConnected),
+                imageVector = if (isInitializing) Icons.Rounded.Wifi else wifiIcon(quality, isConnected),
                 contentDescription = quality.label,
                 modifier = Modifier
                     .size(72.dp)
-                    .then(if (isScanning) Modifier.alpha(scanAlpha) else Modifier),
-                tint = animatedColor
+                    .then(if (isScanning || isInitializing) Modifier.alpha(scanAlpha) else Modifier),
+                tint = if (isInitializing) MaterialTheme.colorScheme.primary else animatedColor
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = if (isConnected) quality.label else "Not Connected",
+                text = when {
+                    isInitializing -> "Checking your WiFi..."
+                    isConnected -> quality.label
+                    else -> "Not Connected"
+                },
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = animatedColor
+                color = if (isInitializing) MaterialTheme.colorScheme.primary else animatedColor
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = if (isConnected) quality.description else "Connect to a WiFi network to start",
+                text = when {
+                    isInitializing -> "Scanning for networks and checking signal"
+                    isConnected -> quality.description
+                    else -> "Connect to a WiFi network to start"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

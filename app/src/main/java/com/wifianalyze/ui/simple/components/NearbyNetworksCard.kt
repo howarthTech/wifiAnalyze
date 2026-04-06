@@ -25,6 +25,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,11 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.wifianalyze.domain.model.CongestionLevel
 import com.wifianalyze.ui.simple.NearbyNetworkInfo
 
 @Composable
 fun NearbyNetworksCard(
     networks: List<NearbyNetworkInfo>,
+    competingCount: Int,
+    congestion: CongestionLevel,
     modifier: Modifier = Modifier
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -54,7 +59,7 @@ fun NearbyNetworksCard(
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header row
+            // Header row — competing count + congestion chip
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -62,21 +67,39 @@ fun NearbyNetworksCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Nearby Networks",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = "$competingCount other network${if (competingCount != 1) "s" else ""} nearby",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "${networks.size} network${if (networks.size != 1) "s" else ""} detected",
+                        text = "Tap to see all ${networks.size} detected",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Icon(
-                    imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    SuggestionChip(
+                        onClick = { expanded = !expanded },
+                        label = {
+                            Text(
+                                text = congestion.label,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = congestion.color.copy(alpha = 0.15f),
+                            labelColor = congestion.color
+                        )
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             // Expandable network list
@@ -112,7 +135,6 @@ private fun NearbyNetworkRow(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // WiFi icon colored by signal quality
         Icon(
             imageVector = Icons.Rounded.Wifi,
             contentDescription = null,
@@ -143,7 +165,6 @@ private fun NearbyNetworkRow(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Signal bar + quality label
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -167,7 +188,6 @@ private fun NearbyNetworkRow(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            // Details row
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
