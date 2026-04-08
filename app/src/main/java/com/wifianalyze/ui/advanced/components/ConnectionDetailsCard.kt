@@ -7,13 +7,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +37,8 @@ fun ConnectionDetailsCard(
     linkSpeedMbps: Int,
     modifier: Modifier = Modifier
 ) {
+    val clipboardManager = LocalClipboardManager.current
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -36,13 +46,43 @@ fun ConnectionDetailsCard(
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Connection Details",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Connection Details",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    onClick = {
+                        val text = buildString {
+                            appendLine("IP Address: ${ipAddress.ifBlank { "—" }}")
+                            appendLine("Gateway: ${gateway.ifBlank { "—" }}")
+                            appendLine("Subnet: ${if (subnetPrefixLength > 0) "/$subnetPrefixLength" else "—"}")
+                            appendLine("DNS: ${dnsServers.ifEmpty { listOf("—") }.joinToString(", ")}")
+                            appendLine("Link Speed: $linkSpeedMbps Mbps")
+                            if (txLinkSpeedMbps > 0 || rxLinkSpeedMbps > 0) {
+                                appendLine("TX Speed: $txLinkSpeedMbps Mbps")
+                                appendLine("RX Speed: $rxLinkSpeedMbps Mbps")
+                            }
+                        }
+                        clipboardManager.setText(AnnotatedString(text.trim()))
+                    },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.ContentCopy,
+                        contentDescription = "Copy connection details",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             DetailRow("IP Address", ipAddress.ifBlank { "—" })
             DetailRow("Gateway", gateway.ifBlank { "—" })

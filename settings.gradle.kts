@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "wifiAnalyze"
 include(":app")
+include(":wear")

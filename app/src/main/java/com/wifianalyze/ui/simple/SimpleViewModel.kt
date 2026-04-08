@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wifianalyze.data.local.RoomReadingDao
 import com.wifianalyze.data.local.entity.RoomReadingEntity
+import com.wifianalyze.data.notification.NotificationHelper
+import com.wifianalyze.data.preferences.AppPreferences
+import com.wifianalyze.data.widget.WidgetUpdater
 import com.wifianalyze.data.wifi.ConnectionInfoProvider
 import com.wifianalyze.data.wifi.WifiScanner
 import com.wifianalyze.domain.CongestionAnalyzer
@@ -73,7 +76,11 @@ class SimpleViewModel @Inject constructor(
     private val iotReadinessChecker: IoTReadinessChecker,
     private val networkOptimizer: NetworkOptimizer,
     private val tipEngine: TipEngine,
-    private val roomReadingDao: RoomReadingDao
+    private val roomReadingDao: RoomReadingDao,
+    private val appPreferences: AppPreferences,
+    private val notificationHelper: NotificationHelper,
+    private val widgetUpdater: WidgetUpdater,
+    private val wearDataSender: com.wifianalyze.data.wear.WearDataSender
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SimpleUiState())
@@ -82,15 +89,27 @@ class SimpleViewModel @Inject constructor(
     val savedReadings: Flow<List<RoomReading>> = roomReadingDao.getAllReadingsRankedBySignal()
         .map { entities -> entities.map { it.toDomain() } }
 
+    // Alert settings (observed locally for use in updateState)
+    private var alertsEnabled = false
+    private var alertThresholdDbm = -75
+    private var lastAlertTime = 0L
+    private val alertCooldownMs = 60_000L
+    private var wasSignalBelowThreshold = false
+
     init {
         startMonitoring()
         observeData()
+        observeAlertPrefs()
 
-        // Give WiFi scan time to return results before showing any negative state
         viewModelScope.launch {
             delay(3_000)
             _uiState.update { it.copy(isInitializing = false) }
         }
+    }
+
+    private fun observeAlertPrefs() {
+        viewModelScope.launch { appPreferences.alertsEnabled.collect { alertsEnabled = it } }
+        viewModelScope.launch { appPreferences.alertThresholdDbm.collect { alertThresholdDbm = it } }
     }
 
     private fun startMonitoring() {
@@ -143,15 +162,7 @@ class SimpleViewModel @Inject constructor(
         }
         val recs = networkOptimizer.analyze(connection, networks)
         val tips = tipEngine.generateTips(connection, networks)
-
-        // Build per-band signal info for this network from scan results
-        val bandSignals = if (connection.isConnected) {
-            buildBandSignalInfo(networks, connection)
-        } else {
-            emptyList()
-        }
-
-        // Build nearby networks list — group by SSID, take the strongest signal per SSID
+        val bandSignals = if (connection.isConnected) buildBandSignalInfo(networks, connection) else emptyList()
         val nearby = networks
             .filter { it.ssid.isNotBlank() }
             .groupBy { it.ssid }
@@ -169,7 +180,6 @@ class SimpleViewModel @Inject constructor(
             }
             .sortedByDescending { it.rssi }
 
-        // Clear initializing only once we have both connection AND scan results
         val hasScanData = networks.isNotEmpty()
         val stillInitializing = _uiState.value.isInitializing && !(connection.isConnected && hasScanData)
 
@@ -196,22 +206,55 @@ class SimpleViewModel @Inject constructor(
                 isScanning = scanning
             )
         }
+
+        // Widget update
+        if (connection.isConnected) {
+            widgetUpdater.update(connection.ssid, connection.rssi, quality.label)
+        }
+
+        // Wear OS update
+        viewModelScope.launch {
+            if (connection.isConnected) {
+                wearDataSender.send(
+                    ssid = connection.ssid,
+                    rssi = connection.rssi,
+                    quality = quality.label,
+                    band = connection.band?.toString() ?: ""
+                )
+            } else {
+                wearDataSender.sendDisconnected()
+            }
+        }
+
+        // Notification alert check with all-clear
+        if (alertsEnabled) {
+            if (connection.isConnected) {
+                val isBelowThreshold = connection.rssi < alertThresholdDbm
+                if (isBelowThreshold && !wasSignalBelowThreshold) {
+                    wasSignalBelowThreshold = true
+                    val now = System.currentTimeMillis()
+                    if (now - lastAlertTime > alertCooldownMs) {
+                        lastAlertTime = now
+                        notificationHelper.sendSignalAlert(connection.ssid, connection.rssi, alertThresholdDbm)
+                    }
+                } else if (!isBelowThreshold && wasSignalBelowThreshold) {
+                    wasSignalBelowThreshold = false
+                    notificationHelper.sendSignalClearAlert(connection.ssid, connection.rssi, alertThresholdDbm)
+                }
+            } else {
+                wasSignalBelowThreshold = false
+            }
+        }
     }
 
     private fun buildBandSignalInfo(
         networks: List<WifiNetwork>,
         connection: ConnectionInfo
     ): List<BandSignalInfo> {
-        // Find the best signal for each band for the connected network
         val myNetworks = networks.filter { it.ssid == connection.ssid }
-
         val bands = listOf(WifiBand.BAND_2_4_GHZ, WifiBand.BAND_5_GHZ, WifiBand.BAND_6_GHZ)
         return bands.mapNotNull { band ->
-            val best = myNetworks
-                .filter { it.band == band }
-                .maxByOrNull { it.rssi }
-                ?: return@mapNotNull null
-
+            val best = myNetworks.filter { it.band == band }.maxByOrNull { it.rssi } ?: return@mapNotNull null
             BandSignalInfo(
                 band = band,
                 rssi = best.rssi,
@@ -231,7 +274,6 @@ class SimpleViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             if (!state.isConnected) return@launch
-
             val entity = RoomReadingEntity(
                 roomName = roomName,
                 rssi = state.rssi,
@@ -250,15 +292,11 @@ class SimpleViewModel @Inject constructor(
     }
 
     fun deleteReading(reading: RoomReading) {
-        viewModelScope.launch {
-            roomReadingDao.deleteReading(reading.toEntity())
-        }
+        viewModelScope.launch { roomReadingDao.deleteReading(reading.toEntity()) }
     }
 
     fun clearAllReadings() {
-        viewModelScope.launch {
-            roomReadingDao.deleteAll()
-        }
+        viewModelScope.launch { roomReadingDao.deleteAll() }
     }
 
     override fun onCleared() {
@@ -268,33 +306,20 @@ class SimpleViewModel @Inject constructor(
     }
 
     private fun RoomReadingEntity.toDomain() = RoomReading(
-        id = id,
-        roomName = roomName,
-        rssi = rssi,
-        ssid = ssid,
-        frequency = frequency,
-        channel = channel,
+        id = id, roomName = roomName, rssi = rssi, ssid = ssid,
+        frequency = frequency, channel = channel,
         band = WifiBand.entries.firstOrNull { it.label == band } ?: WifiBand.UNKNOWN,
         quality = SignalQuality.entries.firstOrNull { it.name == quality } ?: SignalQuality.NO_SIGNAL,
         competingNetworks = competingNetworks,
         congestionLevel = CongestionLevel.entries.firstOrNull { it.name == congestionLevel } ?: CongestionLevel.LOW,
-        iotReady = iotReady,
-        timestamp = timestamp
+        iotReady = iotReady, timestamp = timestamp
     )
 
     private fun RoomReading.toEntity() = RoomReadingEntity(
-        id = id,
-        roomName = roomName,
-        rssi = rssi,
-        ssid = ssid,
-        frequency = frequency,
-        channel = channel,
-        band = band.label,
-        quality = quality.name,
-        competingNetworks = competingNetworks,
-        congestionLevel = congestionLevel.name,
-        iotReady = iotReady,
-        timestamp = timestamp
+        id = id, roomName = roomName, rssi = rssi, ssid = ssid,
+        frequency = frequency, channel = channel, band = band.label,
+        quality = quality.name, competingNetworks = competingNetworks,
+        congestionLevel = congestionLevel.name, iotReady = iotReady, timestamp = timestamp
     )
 
     private fun parseSecurityType(capabilities: String): String {
@@ -302,8 +327,8 @@ class SimpleViewModel @Inject constructor(
             capabilities.contains("WPA3") -> "WPA3"
             capabilities.contains("WPA2") && capabilities.contains("WPA3") -> "WPA2/WPA3"
             capabilities.contains("WPA2") -> "WPA2"
-            capabilities.contains("WPA") -> "WPA"
-            capabilities.contains("WEP") -> "WEP"
+            capabilities.contains("WPA")  -> "WPA"
+            capabilities.contains("WEP")  -> "WEP"
             capabilities.contains("ESS") && !capabilities.contains("WPA") && !capabilities.contains("WEP") -> "Open"
             else -> "Unknown"
         }

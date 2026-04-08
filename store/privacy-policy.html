@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WiFi Analyze — Privacy Policy</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 40px; }
+    h2 { font-size: 1.1rem; margin-top: 36px; margin-bottom: 8px; color: #1565C0; }
+    p { margin: 8px 0; }
+    ul { margin: 8px 0; padding-left: 24px; }
+    li { margin: 4px 0; }
+    .highlight {
+      background: #E3F2FD;
+      border-left: 4px solid #1565C0;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    footer { margin-top: 48px; color: #999; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">WiFi Analyze &nbsp;·&nbsp; Last updated: April 2026</p>
+
+  <div class="highlight">
+    <strong>Short version:</strong> WiFi Analyze does not collect, store, or transmit any personal data.
+    Everything the app reads stays on your device.
+  </div>
+
+  <h2>What the app does</h2>
+  <p>
+    WiFi Analyze reads your device's WiFi state to display signal strength, nearby networks,
+    channel congestion, and connection details. It can save room-by-room signal readings and
+    speed/latency test results to help you optimize your home network.
+  </p>
+
+  <h2>Data collected</h2>
+  <p>WiFi Analyze collects <strong>no personal data</strong>. Specifically:</p>
+  <ul>
+    <li>No account or login is required.</li>
+    <li>No analytics or crash-reporting SDKs are included.</li>
+    <li>No advertising SDKs are included.</li>
+    <li>No data is sent to any server operated by the developer.</li>
+  </ul>
+
+  <h2>Data stored on your device</h2>
+  <p>
+    The app stores the following data <strong>locally on your device only</strong>, using
+    Android's Room database and DataStore:
+  </p>
+  <ul>
+    <li>Room-by-room signal readings you manually save (room name, signal strength, timestamp)</li>
+    <li>Speed test results (download/upload Mbps, timestamp, network name)</li>
+    <li>Latency test results (ping times, timestamp, network name)</li>
+    <li>App preferences (display mode, alert threshold, dark mode setting)</li>
+  </ul>
+  <p>
+    This data never leaves your device and can be deleted at any time via
+    Settings → Clear All Saved Rooms, or by uninstalling the app.
+  </p>
+
+  <h2>Permissions used</h2>
+  <ul>
+    <li>
+      <strong>Approximate Location</strong> — Required by Android to scan for nearby WiFi networks
+      and read network names (SSIDs). The app does not use your location for any other purpose
+      and does not store GPS coordinates.
+    </li>
+    <li>
+      <strong>Nearby Devices / WiFi State</strong> — Used to read your current WiFi connection
+      details (signal strength, channel, band, IP address).
+    </li>
+    <li>
+      <strong>Notifications</strong> — Optional. Used only to send signal-weakness alerts
+      you configure in Settings. No notifications are sent without your explicit opt-in.
+    </li>
+    <li>
+      <strong>Internet</strong> — Used only when you manually run a speed test (connects to
+      Cloudflare's speed test servers). Not used at any other time.
+    </li>
+  </ul>
+
+  <h2>Third-party services</h2>
+  <p>
+    The only external network request the app makes is the optional speed test, which contacts
+    <a href="https://speed.cloudflare.com" target="_blank">speed.cloudflare.com</a>.
+    Cloudflare's own privacy policy applies to that request.
+  </p>
+  <p>
+    The "Buy Me a Pizza" button opens
+    <a href="https://buymeacoffee.com" target="_blank">buymeacoffee.com</a> in your browser.
+    That site's own privacy policy applies if you choose to visit it.
+  </p>
+
+  <h2>Children's privacy</h2>
+  <p>
+    This app does not knowingly collect any information from anyone, including children under 13.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    If this policy changes, the updated version will be posted at this URL with a revised date.
+    Continued use of the app after changes constitutes acceptance of the updated policy.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about this policy? Reach out via
+    <a href="https://buymeacoffee.com/howarthtech">buymeacoffee.com/howarthtech</a>.
+  </p>
+
+  <footer>
+    WiFi Analyze is developed by HowarthTech. This app is not affiliated with or endorsed by
+    any router manufacturer or internet service provider.
+  </footer>
+
+</body>
+</html>

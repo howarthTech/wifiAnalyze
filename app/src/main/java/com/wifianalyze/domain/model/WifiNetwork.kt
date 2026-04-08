@@ -7,5 +7,7 @@ data class WifiNetwork(
     val frequency: Int,
     val channel: Int,
     val band: WifiBand,
-    val capabilities: String
+    val capabilities: String,
+    val channelWidthMhz: Int = 20,
+    val vendorName: String = ""
 )

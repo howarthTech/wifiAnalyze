@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
 import com.wifianalyze.domain.ChannelHelper
+import com.wifianalyze.domain.OuiLookup
 import com.wifianalyze.domain.model.WifiNetwork
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,6 +94,13 @@ class WifiScannerImpl @Inject constructor(
             if (ssid.isBlank()) return@mapNotNull null
 
             val freq = scanResult.frequency
+            val channelWidthMhz = when (scanResult.channelWidth) {
+                1 -> 40   // CHANNEL_WIDTH_40MHZ
+                2 -> 80   // CHANNEL_WIDTH_80MHZ
+                3 -> 160  // CHANNEL_WIDTH_160MHZ
+                5 -> 320  // CHANNEL_WIDTH_320MHZ (Wi-Fi 7, API 33+)
+                else -> 20 // 0=20MHz, 4=80+80MHz (treat primary as 80→default), unknown
+            }
             WifiNetwork(
                 ssid = ssid,
                 bssid = scanResult.BSSID ?: "",
@@ -100,7 +108,9 @@ class WifiScannerImpl @Inject constructor(
                 frequency = freq,
                 channel = ChannelHelper.frequencyToChannel(freq),
                 band = ChannelHelper.frequencyToBand(freq),
-                capabilities = scanResult.capabilities ?: ""
+                capabilities = scanResult.capabilities ?: "",
+                channelWidthMhz = channelWidthMhz,
+                vendorName = OuiLookup.lookup(scanResult.BSSID ?: "")
             )
         }
 

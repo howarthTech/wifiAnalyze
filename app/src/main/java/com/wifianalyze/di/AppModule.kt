@@ -4,7 +4,10 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import androidx.room.Room
+import com.wifianalyze.data.local.LatencyHistoryDao
 import com.wifianalyze.data.local.RoomReadingDao
+import com.wifianalyze.data.local.SignalHistoryDao
+import com.wifianalyze.data.local.SpeedTestHistoryDao
 import com.wifianalyze.data.local.WifiAnalyzeDatabase
 import com.wifianalyze.data.wifi.WifiScanner
 import com.wifianalyze.data.wifi.WifiScannerImpl
@@ -37,11 +40,29 @@ object AppModule {
             context,
             WifiAnalyzeDatabase::class.java,
             "wifi_analyze.db"
-        ).build()
+        )
+        .addMigrations(
+            WifiAnalyzeDatabase.MIGRATION_1_2,
+            WifiAnalyzeDatabase.MIGRATION_2_3,
+            WifiAnalyzeDatabase.MIGRATION_3_4
+        )
+        .build()
 
     @Provides
     fun provideRoomReadingDao(database: WifiAnalyzeDatabase): RoomReadingDao =
         database.roomReadingDao()
+
+    @Provides
+    fun provideSignalHistoryDao(database: WifiAnalyzeDatabase): SignalHistoryDao =
+        database.signalHistoryDao()
+
+    @Provides
+    fun provideSpeedTestHistoryDao(database: WifiAnalyzeDatabase): SpeedTestHistoryDao =
+        database.speedTestHistoryDao()
+
+    @Provides
+    fun provideLatencyHistoryDao(database: WifiAnalyzeDatabase): LatencyHistoryDao =
+        database.latencyHistoryDao()
 }
 
 @Module

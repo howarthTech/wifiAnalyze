@@ -42,8 +42,11 @@ fun RawSignalCard(
     band: WifiBand,
     linkSpeedMbps: Int,
     bssid: String,
+    vendorName: String,
     isConnected: Boolean,
     isInitializing: Boolean,
+    stabilityScore: Int? = null,
+    stabilityLabel: String = "",
     modifier: Modifier = Modifier
 ) {
     val animatedColor by animateColorAsState(
@@ -148,6 +151,31 @@ fun RawSignalCard(
                 ) {
                     DetailItem("Link Speed", "${linkSpeedMbps} Mbps")
                     DetailItem("BSSID", bssid)
+                    DetailItem("Vendor", vendorName.ifEmpty { "—" })
+                }
+
+                if (stabilityScore != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val stabilityColor = when {
+                        stabilityScore >= 85 -> Color(0xFF4CAF50)
+                        stabilityScore >= 65 -> Color(0xFF8BC34A)
+                        stabilityScore >= 45 -> Color(0xFFFFC107)
+                        else                 -> Color(0xFFFF9800)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        DetailItem("Stability", stabilityLabel)
+                        Text(
+                            text = "$stabilityScore / 100",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = stabilityColor
+                        )
+                    }
                 }
             }
         }
