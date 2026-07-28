@@ -32,11 +32,24 @@ class WifiScannerImpl @Inject constructor(
     override val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
     private var receiver: BroadcastReceiver? = null
+    private var lastScanRequestMs = 0L
+
+    // Android throttles foreground apps to ~4 scans per 2 minutes; requesting more
+    // just returns failure and re-serves stale results. Space our requests out and
+    // serve the cached results in between.
+    private val minScanIntervalMs = 30_000L
 
     override fun startScan() {
         if (receiver == null) {
             registerReceiver()
         }
+
+        val now = System.currentTimeMillis()
+        if (now - lastScanRequestMs < minScanIntervalMs) {
+            processScanResults()
+            return
+        }
+        lastScanRequestMs = now
 
         _isScanning.value = true
 

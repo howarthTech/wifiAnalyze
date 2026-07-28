@@ -23,11 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,8 +42,8 @@ import com.wifianalyze.ui.advanced.components.NetworkScoreCard
 import com.wifianalyze.ui.advanced.components.RawSignalCard
 import com.wifianalyze.ui.advanced.components.SpeedTestCard
 import com.wifianalyze.ui.advanced.components.SignalHistoryChart
+import com.wifianalyze.ui.simple.components.StatusNoticeCard
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,8 +54,22 @@ fun AdvancedDashboardScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    // End the refresh indicator when the actual scan finishes (with a timeout so a
+    // throttled scan that never flips isScanning can't leave the spinner stuck).
+    LaunchedEffect(isRefreshing, state.isScanning) {
+        if (isRefreshing && !state.isScanning) {
+            delay(400)
+            isRefreshing = false
+        }
+    }
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            delay(5_000)
+            isRefreshing = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -110,10 +124,6 @@ fun AdvancedDashboardScreen(
             onRefresh = {
                 isRefreshing = true
                 viewModel.refresh()
-                scope.launch {
-                    delay(1500)
-                    isRefreshing = false
-                }
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -124,6 +134,15 @@ fun AdvancedDashboardScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (!state.isInitializing && (!state.wifiEnabled || !state.locationEnabled)) {
+                    item {
+                        StatusNoticeCard(
+                            wifiEnabled = state.wifiEnabled,
+                            locationEnabled = state.locationEnabled
+                        )
+                    }
+                }
+
                 // Raw signal dBm card
                 item {
                     RawSignalCard(

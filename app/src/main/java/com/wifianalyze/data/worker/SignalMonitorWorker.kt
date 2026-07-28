@@ -29,8 +29,12 @@ class SignalMonitorWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         @Suppress("DEPRECATION")
-        val wifiInfo = wifiManager.connectionInfo ?: return Result.success()
-        if (wifiInfo.networkId == -1) return Result.success()
+        val wifiInfo = wifiManager.connectionInfo
+        if (wifiInfo == null || wifiInfo.networkId == -1) {
+            // Keep the home-screen widget honest instead of showing the last-known network forever
+            widgetUpdater.updateDisconnected()
+            return Result.success()
+        }
 
         val rssi = wifiInfo.rssi
         if (rssi == 0 || rssi <= -127) return Result.success()
@@ -57,11 +61,19 @@ class SignalMonitorWorker @AssistedInject constructor(
         val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 3600_000L
         signalHistoryDao.deleteOlderThan(sevenDaysAgo)
 
-        // Check alert threshold
+        // Check alert threshold — edge-triggered so a persistently weak signal doesn't
+        // re-notify every 15 minutes. State persists across worker runs via DataStore.
         val alertsEnabled = appPreferences.alertsEnabled.first()
         val threshold = appPreferences.alertThresholdDbm.first()
-        if (alertsEnabled && rssi < threshold) {
-            notificationHelper.sendSignalAlert(ssid, rssi, threshold)
+        if (alertsEnabled) {
+            val alertActive = appPreferences.signalAlertActive.first()
+            if (rssi < threshold && !alertActive) {
+                appPreferences.setSignalAlertActive(true)
+                notificationHelper.sendSignalAlert(ssid, rssi, threshold)
+            } else if (rssi >= threshold && alertActive) {
+                appPreferences.setSignalAlertActive(false)
+                notificationHelper.sendSignalClearAlert(ssid, rssi, threshold)
+            }
         }
 
         // Update home screen widget

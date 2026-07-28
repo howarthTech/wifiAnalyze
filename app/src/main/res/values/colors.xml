@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#1A237E</color>
+    <!-- Launch-window background (see themes.xml); matches the Compose light surface -->
+    <color name="window_background">#FEF7FF</color>
 </resources>

@@ -63,13 +63,23 @@ fun SettingsScreen(
 
     var sliderValue by remember(alertThresholdDbm) { mutableFloatStateOf(alertThresholdDbm.toFloat()) }
 
-    val hasNotifPermission = remember(alertsEnabled) {
-        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
+    var hasNotifPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+        )
     }
     val permLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* user responded — NotificationHelper checks permission on send */ }
+    ) { granted -> hasNotifPermission = granted }
+
+    fun openUrl(url: String) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+            // No browser installed — nothing sensible to do
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -159,7 +169,7 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Text(
-                            text = "Alert fires once per minute while signal stays below threshold.",
+                            text = "You'll get one alert when the signal drops below the threshold, and an all-clear when it recovers.",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -206,11 +216,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/howarthtech"))
-                            )
-                        },
+                        onClick = { openUrl("https://buymeacoffee.com/howarthtech") },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = androidx.compose.ui.graphics.Color(0xFFE8430A),
                             contentColor = androidx.compose.ui.graphics.Color(0xFFFFFFFF)
@@ -234,7 +240,7 @@ fun SettingsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("About", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("WiFi Analyze v1.1", style = MaterialTheme.typography.bodyMedium)
+                    Text("WiFi Analyze v${com.wifianalyze.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
                     Text(
                         text = "Check WiFi signal strength and find the best spots for your smart home devices.",
                         style = MaterialTheme.typography.bodySmall,
@@ -242,11 +248,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedButton(
-                        onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse("https://howarthtech.github.io/wifiAnalyze/store/privacy-policy.html"))
-                            )
-                        },
+                        onClick = { openUrl("https://howarthtech.github.io/wifiAnalyze/store/privacy-policy.html") },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Privacy Policy")

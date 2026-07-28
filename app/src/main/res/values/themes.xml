@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launch-window theme. Compose draws the real UI; this controls the window
+         background shown before the first frame (avoids a white flash in dark mode —
+         see values-night/themes.xml). -->
+    <style name="Theme.WifiAnalyze" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

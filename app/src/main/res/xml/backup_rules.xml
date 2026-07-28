@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pre-Android-12 auto-backup rules; mirrors data_extraction_rules.xml cloud policy -->
+<full-backup-content>
+    <exclude domain="database" />
+    <exclude domain="file" path="datastore/" />
+</full-backup-content>

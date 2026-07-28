@@ -28,17 +28,25 @@ class ConnectionInfoProvider @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) {
 
-    private fun isLocationEnabled(): Boolean {
+    fun isLocationEnabled(): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isLocationEnabled
     }
+
+    fun isWifiEnabled(): Boolean = wifiManager.isWifiEnabled
 
     private val _connectionInfo = MutableStateFlow(ConnectionInfo.DISCONNECTED)
     val connectionInfo: StateFlow<ConnectionInfo> = _connectionInfo.asStateFlow()
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var monitorCount = 0
 
     fun startMonitoring() {
+        // Shared singleton: both view models call this. Ref-count so that during a
+        // mode switch (new VM starts before old VM's onCleared) we neither register
+        // a duplicate callback nor tear down the one the new VM relies on.
+        monitorCount++
+        if (networkCallback != null) return
         try {
             val request = NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -76,6 +84,8 @@ class ConnectionInfoProvider @Inject constructor(
     }
 
     fun stopMonitoring() {
+        monitorCount = (monitorCount - 1).coerceAtLeast(0)
+        if (monitorCount > 0) return
         networkCallback?.let {
             try {
                 connectivityManager.unregisterNetworkCallback(it)

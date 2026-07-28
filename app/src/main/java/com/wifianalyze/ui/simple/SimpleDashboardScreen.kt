@@ -26,11 +26,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,10 +41,10 @@ import com.wifianalyze.ui.simple.components.IoTReadinessCard
 import com.wifianalyze.ui.simple.components.NearbyNetworksCard
 import com.wifianalyze.ui.simple.components.RecommendationsCard
 import com.wifianalyze.ui.simple.components.SignalQualityCard
+import com.wifianalyze.ui.simple.components.StatusNoticeCard
 import com.wifianalyze.ui.simple.components.TipBanner
 import com.wifianalyze.ui.simple.components.YourNetworkBandsCard
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +56,21 @@ fun SimpleDashboardScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+
+    // End the refresh indicator when the actual scan finishes (with a timeout so a
+    // throttled scan that never flips isScanning can't leave the spinner stuck).
+    LaunchedEffect(isRefreshing, state.isScanning) {
+        if (isRefreshing && !state.isScanning) {
+            delay(400)
+            isRefreshing = false
+        }
+    }
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            delay(5_000)
+            isRefreshing = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -108,10 +122,6 @@ fun SimpleDashboardScreen(
             onRefresh = {
                 isRefreshing = true
                 viewModel.refresh()
-                scope.launch {
-                    delay(1500)
-                    isRefreshing = false
-                }
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -122,6 +132,15 @@ fun SimpleDashboardScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (!state.isInitializing && (!state.wifiEnabled || !state.locationEnabled)) {
+                    item {
+                        StatusNoticeCard(
+                            wifiEnabled = state.wifiEnabled,
+                            locationEnabled = state.locationEnabled
+                        )
+                    }
+                }
+
                 item {
                     SignalQualityCard(
                         quality = state.quality,

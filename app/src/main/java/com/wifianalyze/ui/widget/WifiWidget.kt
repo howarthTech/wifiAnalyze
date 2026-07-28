@@ -35,12 +35,14 @@ class WifiWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val prefs   = currentState<Preferences>()
-            val ssid    = prefs[WidgetUpdater.KEY_SSID]    ?: "Not connected"
-            val rssi    = prefs[WidgetUpdater.KEY_RSSI]    ?: -100
-            val quality = prefs[WidgetUpdater.KEY_QUALITY] ?: "No Signal"
+            val prefs     = currentState<Preferences>()
+            val ssid      = prefs[WidgetUpdater.KEY_SSID]      ?: ""
+            val rssi      = prefs[WidgetUpdater.KEY_RSSI]      ?: -100
+            val quality   = prefs[WidgetUpdater.KEY_QUALITY]   ?: "No Signal"
+            val connected = prefs[WidgetUpdater.KEY_CONNECTED] ?: (ssid.isNotBlank())
 
             val qualityColor = when {
+                !connected  -> Color.Gray
                 rssi >= -50 -> Color(0xFF4CAF50)
                 rssi >= -60 -> Color(0xFF8BC34A)
                 rssi >= -70 -> Color(0xFFFFC107)
@@ -62,25 +64,35 @@ class WifiWidget : GlanceAppWidget() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = quality,
+                            text = if (connected) quality else "Not Connected",
                             style = TextStyle(
                                 color = ColorProvider(qualityColor),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                         )
-                        Text(
-                            text = "$rssi dBm",
-                            style = TextStyle(
-                                color = ColorProvider(Color.Gray),
-                                fontSize = 12.sp
+                        if (connected) {
+                            Text(
+                                text = "$rssi dBm",
+                                style = TextStyle(
+                                    color = ColorProvider(Color.Gray),
+                                    fontSize = 12.sp
+                                )
                             )
-                        )
-                        Text(
-                            text = ssid,
-                            style = TextStyle(fontSize = 10.sp),
-                            maxLines = 1
-                        )
+                            Text(
+                                text = ssid,
+                                style = TextStyle(fontSize = 10.sp),
+                                maxLines = 1
+                            )
+                        } else {
+                            Text(
+                                text = "Tap to open",
+                                style = TextStyle(
+                                    color = ColorProvider(Color.Gray),
+                                    fontSize = 10.sp
+                                )
+                            )
+                        }
                     }
                 }
             }

@@ -54,6 +54,23 @@ For power users who want detailed technical data.
 
 ---
 
+## v1.2 — UX Hardening + Play Store Readiness ✅ Complete
+
+- [x] Scan rate-limiting — `WifiScannerImpl` spaces `startScan()` calls ≥30s apart (Android throttles to ~4/2min); cached results served in between
+- [x] WiFi-off / Location-off guidance — `StatusNoticeCard` on both dashboards with one-tap deep links to system settings
+- [x] Permission flow recovery — single "Deny" allows retry; permanent denial detected via rationale API; auto-advances when granted from system Settings (ON_RESUME re-check)
+- [x] Edge-triggered background alerts — worker persists alert state in DataStore (shared with foreground VM); one alert on drop, one all-clear on recovery — no more 15-min repeats
+- [x] Honest pull-to-refresh — spinner tied to actual scan state, not a fixed 1.5s timer
+- [x] Widget disconnected state — "Not Connected / Tap to open" instead of stale last-known network (VMs + worker all push it)
+- [x] Friendly speed-test errors — UnknownHost/Timeout/IO mapped to plain-English messages
+- [x] Network callback leak fix — `ConnectionInfoProvider` ref-counts start/stop across VM handoffs
+- [x] Proper notification icon (WiFi glyph, was the system sync icon)
+- [x] Settings polish — notif-permission warning refreshes after grant, browser links can't crash, version from BuildConfig
+- [x] Play Store: created missing `app/proguard-rules.pro` (release build was broken), feature graphic → 1024×500, screenshots → 1080×2160 (≤2:1), backup/data-extraction rules, app theme with dark launch window, monochrome themed icon, widget picker preview + description, predictive back opt-in, `@string/app_name` label, versionCode 3 / v1.2
+- [x] `store/RELEASE-CHECKLIST.md` — Play Console steps (location declaration, Data safety, privacy policy URL), wear distribution caveat
+
+---
+
 ## Cross-Cutting Features ✅ Complete
 
 - [x] Custom app icon — WiFi arcs + pulse line on blue gradient background (adaptive icon)

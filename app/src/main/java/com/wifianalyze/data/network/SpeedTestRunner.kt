@@ -43,9 +43,20 @@ class SpeedTestRunner @Inject constructor() {
 
                 SpeedTestState.Result(downloadMbps, uploadMbps)
             } catch (e: Exception) {
-                SpeedTestState.Error(e.message ?: "Speed test failed")
+                SpeedTestState.Error(friendlyMessage(e))
             }
         }
+
+    private fun friendlyMessage(e: Exception): String = when (e) {
+        is java.net.UnknownHostException ->
+            "No internet connection. Your WiFi is connected but can't reach the internet — check your router or modem, then try again."
+        is java.net.SocketTimeoutException ->
+            "The connection timed out. Your internet may be very slow or unstable right now — try again in a moment."
+        is java.io.IOException ->
+            "Couldn't reach the speed test server. Check that your WiFi has internet access and try again."
+        else ->
+            "Speed test failed. Please try again."
+    }
 
     // ── internals ─────────────────────────────────────────────────────────────
 

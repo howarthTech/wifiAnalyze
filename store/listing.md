@@ -85,6 +85,15 @@ Dark navy (#0D47A1) background. Left side: large WiFi arc icon in white. Right s
 
 ---
 
+## What's New (Release Notes — v1.2)
+• Clear guidance when WiFi or Location Services are off, with one-tap fixes
+• Widget now shows "Not Connected" instead of stale data when WiFi drops
+• Signal alerts no longer repeat while the signal stays weak — one alert, one all-clear
+• Smarter scanning that works with Android's scan limits
+• Permission setup recovers gracefully from an accidental "Deny"
+• Friendlier speed test errors when there's no internet
+• Themed app icon (Android 13+), dark launch screen, widget picker preview
+
 ## What's New (Release Notes — v1.1)
 • Home screen widget with tap-to-open
 • Signal history charts (24h and 7-day)

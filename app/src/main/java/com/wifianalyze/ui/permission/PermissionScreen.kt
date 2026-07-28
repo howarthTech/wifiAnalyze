@@ -1,7 +1,11 @@
 package com.wifianalyze.ui.permission
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,26 +39,68 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+
+private val requiredPermissions = arrayOf(
+    Manifest.permission.NEARBY_WIFI_DEVICES,
+    Manifest.permission.ACCESS_FINE_LOCATION
+)
+
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
+
+private fun Context.hasAllPermissions(): Boolean = requiredPermissions.all {
+    ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+}
 
 @Composable
 fun PermissionScreen(
     onPermissionsGranted: () -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var deniedOnce by remember { mutableStateOf(false) }
     var permanentlyDenied by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
+        if (permissions.values.all { it }) {
             onPermissionsGranted()
         } else {
-            permanentlyDenied = true
+            // A plain "Deny" still allows re-asking; only treat as permanent when the
+            // system refuses to show the dialog again ("Don't ask again" / repeat denials).
+            val activity = context.findActivity()
+            val canAskAgain = activity != null && requiredPermissions.any {
+                activity.shouldShowRequestPermissionRationale(it)
+            }
+            deniedOnce = true
+            permanentlyDenied = !canAskAgain
         }
+    }
+
+    // If the user grants the permissions from system Settings and comes back, move on
+    // automatically instead of leaving them stuck on this screen.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && context.hasAllPermissions()) {
+                onPermissionsGranted()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Column(
@@ -121,7 +168,7 @@ fun PermissionScreen(
 
         if (permanentlyDenied) {
             Text(
-                text = "Permissions were denied. Please enable them in your phone's Settings to use this app.",
+                text = "Permissions were denied. Please enable \"Nearby devices\" and \"Location\" for WiFi Analyze in your phone's Settings.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.error
@@ -132,28 +179,32 @@ fun PermissionScreen(
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = Uri.fromParts("package", context.packageName, null)
                     }
-                    context.startActivity(intent)
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: Exception) { /* settings app unavailable */ }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Open Settings")
             }
         } else {
+            if (deniedOnce) {
+                Text(
+                    text = "WiFi Analyze can't scan networks without these permissions. Nothing is tracked — Android just requires them for WiFi scanning.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             Button(
-                onClick = {
-                    permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.NEARBY_WIFI_DEVICES,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        )
-                    )
-                },
+                onClick = { permissionLauncher.launch(requiredPermissions) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
                 Text(
-                    "Get Started",
+                    if (deniedOnce) "Try Again" else "Get Started",
                     style = MaterialTheme.typography.titleMedium
                 )
             }

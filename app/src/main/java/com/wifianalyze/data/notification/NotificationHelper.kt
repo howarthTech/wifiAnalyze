@@ -1,4 +1,4 @@
-package com.wifianalyze.data.notification
+﻿package com.wifianalyze.data.notification
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -41,7 +41,7 @@ class NotificationHelper @Inject constructor(
         if (!hasNotificationPermission()) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setSmallIcon(com.wifianalyze.R.drawable.ic_stat_wifi)
             .setContentTitle("Weak WiFi Signal")
             .setContentText("$ssid: $rssi dBm (threshold: $thresholdDbm dBm)")
             .setStyle(NotificationCompat.BigTextStyle()
@@ -59,9 +59,9 @@ class NotificationHelper @Inject constructor(
         if (!hasNotificationPermission()) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setSmallIcon(com.wifianalyze.R.drawable.ic_stat_wifi)
             .setContentTitle("WiFi Signal Recovered")
-            .setContentText("$ssid: $rssi dBm — back above $thresholdDbm dBm threshold")
+            .setContentText("$ssid: $rssi dBm â€” back above $thresholdDbm dBm threshold")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(buildPendingIntent())
             .setAutoCancel(true)
@@ -77,7 +77,7 @@ class NotificationHelper @Inject constructor(
         if (!hasNotificationPermission()) return
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setSmallIcon(com.wifianalyze.R.drawable.ic_stat_wifi)
             .setContentTitle("Channel Congestion Detected")
             .setContentText("$ssid: $competingCount networks on Ch $currentChannel. Try Ch $suggestedChannel.")
             .setStyle(NotificationCompat.BigTextStyle()

@@ -54,6 +54,8 @@ data class NetworkScore(
 data class AdvancedUiState(
     val isInitializing: Boolean = true,
     val isConnected: Boolean = false,
+    val wifiEnabled: Boolean = true,
+    val locationEnabled: Boolean = true,
     val ssid: String = "",
     val bssid: String = "",
     val rssi: Int = -100,
@@ -183,6 +185,8 @@ class AdvancedViewModel @Inject constructor(
             }
 
             widgetUpdater.update(connection.ssid, connection.rssi, quality.label)
+        } else {
+            widgetUpdater.updateDisconnected()
         }
 
         val stability = computeStability(signalSamples)
@@ -193,6 +197,8 @@ class AdvancedViewModel @Inject constructor(
             val updated = current.copy(
                 isInitializing = stillInitializing,
                 isConnected = connection.isConnected,
+                wifiEnabled = connectionInfoProvider.isWifiEnabled(),
+                locationEnabled = connectionInfoProvider.isLocationEnabled(),
                 ssid = connection.ssid,
                 bssid = connection.bssid,
                 rssi = connection.rssi,

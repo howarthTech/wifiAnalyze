@@ -48,6 +48,8 @@ data class NearbyNetworkInfo(
 data class SimpleUiState(
     val isInitializing: Boolean = true,
     val isConnected: Boolean = false,
+    val wifiEnabled: Boolean = true,
+    val locationEnabled: Boolean = true,
     val ssid: String = "",
     val rssi: Int = -100,
     val quality: SignalQuality = SignalQuality.NO_SIGNAL,
@@ -187,6 +189,8 @@ class SimpleViewModel @Inject constructor(
             SimpleUiState(
                 isInitializing = stillInitializing,
                 isConnected = connection.isConnected,
+                wifiEnabled = connectionInfoProvider.isWifiEnabled(),
+                locationEnabled = connectionInfoProvider.isLocationEnabled(),
                 ssid = connection.ssid,
                 rssi = connection.rssi,
                 quality = quality,
@@ -210,6 +214,8 @@ class SimpleViewModel @Inject constructor(
         // Widget update
         if (connection.isConnected) {
             widgetUpdater.update(connection.ssid, connection.rssi, quality.label)
+        } else {
+            widgetUpdater.updateDisconnected()
         }
 
         // Wear OS update
@@ -236,10 +242,13 @@ class SimpleViewModel @Inject constructor(
                     if (now - lastAlertTime > alertCooldownMs) {
                         lastAlertTime = now
                         notificationHelper.sendSignalAlert(connection.ssid, connection.rssi, alertThresholdDbm)
+                        // Shared with SignalMonitorWorker so the background pass doesn't re-alert
+                        viewModelScope.launch { appPreferences.setSignalAlertActive(true) }
                     }
                 } else if (!isBelowThreshold && wasSignalBelowThreshold) {
                     wasSignalBelowThreshold = false
                     notificationHelper.sendSignalClearAlert(connection.ssid, connection.rssi, alertThresholdDbm)
+                    viewModelScope.launch { appPreferences.setSignalAlertActive(false) }
                 }
             } else {
                 wasSignalBelowThreshold = false

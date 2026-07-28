@@ -26,6 +26,7 @@ class AppPreferences @Inject constructor(
     private val alertThresholdKey            = intPreferencesKey("alert_threshold_dbm")
     private val lastChannelRecommendationKey = longPreferencesKey("last_channel_notif_ms")
     private val hasSeenOnboardingKey         = booleanPreferencesKey("has_seen_onboarding")
+    private val signalAlertActiveKey         = booleanPreferencesKey("signal_alert_active")
 
     val isAdvancedMode: Flow<Boolean>           = context.dataStore.data.map { it[advancedModeKey] ?: false }
     val isDarkMode: Flow<Boolean>               = context.dataStore.data.map { it[darkModeKey] ?: false }
@@ -33,6 +34,8 @@ class AppPreferences @Inject constructor(
     val alertThresholdDbm: Flow<Int>            = context.dataStore.data.map { it[alertThresholdKey] ?: -75 }
     val lastChannelRecommendationMs: Flow<Long> = context.dataStore.data.map { it[lastChannelRecommendationKey] ?: 0L }
     val hasSeenOnboarding: Flow<Boolean>        = context.dataStore.data.map { it[hasSeenOnboardingKey] ?: false }
+    // Whether a weak-signal alert has been sent and not yet cleared (edge-triggered alerts)
+    val signalAlertActive: Flow<Boolean>        = context.dataStore.data.map { it[signalAlertActiveKey] ?: false }
 
     suspend fun setAdvancedMode(enabled: Boolean)          { context.dataStore.edit { it[advancedModeKey] = enabled } }
     suspend fun setDarkMode(enabled: Boolean)              { context.dataStore.edit { it[darkModeKey] = enabled } }
@@ -40,4 +43,5 @@ class AppPreferences @Inject constructor(
     suspend fun setAlertThresholdDbm(threshold: Int)       { context.dataStore.edit { it[alertThresholdKey] = threshold } }
     suspend fun setLastChannelRecommendationMs(ts: Long)   { context.dataStore.edit { it[lastChannelRecommendationKey] = ts } }
     suspend fun setHasSeenOnboarding(seen: Boolean)        { context.dataStore.edit { it[hasSeenOnboardingKey] = seen } }
+    suspend fun setSignalAlertActive(active: Boolean)      { context.dataStore.edit { it[signalAlertActiveKey] = active } }
 }

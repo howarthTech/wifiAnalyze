@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1024px;
+      height: 500px;
+      overflow: hidden;
+      background: #0D47A1;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .container {
+      width: 1024px;
+      height: 500px;
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 50%, #0A3880 100%);
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle background circles for depth */
+    .bg-circle-1 {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      top: -150px;
+      left: -100px;
+    }
+    .bg-circle-2 {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      bottom: -150px;
+      left: 50px;
+    }
+
+    /* LEFT — WiFi icon */
+    .left {
+      width: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .wifi-icon {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wifi-icon svg {
+      width: 240px;
+      height: 240px;
+      filter: drop-shadow(0 0 32px rgba(255,255,255,0.2));
+    }
+
+    /* DIVIDER */
+    .divider {
+      width: 1px;
+      height: 320px;
+      background: rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+
+    /* RIGHT — Text + mock card */
+    .right {
+      flex: 1;
+      padding: 0 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .app-name {
+      font-size: 56px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .tagline {
+      font-size: 22px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.2px;
+      margin-bottom: 8px;
+    }
+
+    /* Mock signal card */
+    .mock-card {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+      backdrop-filter: blur(8px);
+      width: fit-content;
+    }
+
+    .signal-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4CAF50;
+      box-shadow: 0 0 12px #4CAF50;
+      flex-shrink: 0;
+    }
+
+    .signal-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .signal-dbm {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: "Courier New", monospace;
+      color: #FFFFFF;
+    }
+
+    .signal-quality {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4CAF50;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .signal-sep {
+      width: 1px;
+      height: 36px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    .signal-band {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .band-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .band-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="bg-circle-1"></div>
+    <div class="bg-circle-2"></div>
+
+    <!-- LEFT: WiFi icon -->
+    <div class="left">
+      <div class="wifi-icon">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- WiFi arcs -->
+          <path d="M 15 48 Q 50 10 85 48" stroke="white" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.5"/>
+          <path d="M 25 58 Q 50 28 75 58" stroke="white" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.75"/>
+          <path d="M 35 68 Q 50 48 65 68" stroke="white" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <!-- Center dot -->
+          <circle cx="50" cy="78" r="6" fill="white"/>
+          <!-- Pulse / EKG line -->
+          <path d="M 18 88 L 32 88 L 36 78 L 41 96 L 46 72 L 51 88 L 82 88"
+                stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- RIGHT: Text + mock -->
+    <div class="right">
+      <div class="app-name">WiFi Analyze</div>
+      <div class="tagline">Know your signal. Everywhere.</div>
+
+      <div class="mock-card">
+        <div class="signal-dot"></div>
+        <div class="signal-info">
+          <div class="signal-dbm">-52 dBm</div>
+          <div class="signal-quality">Excellent</div>
+        </div>
+        <div class="signal-sep"></div>
+        <div class="signal-band">
+          <div class="band-label">5 GHz</div>
+          <div class="band-sub">Channel 36</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
