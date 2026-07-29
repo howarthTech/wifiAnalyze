@@ -11,38 +11,83 @@ up somewhere safe**; losing it means you can never update the app).
 
 ## Already done in the repo (v1.2)
 - [x] `app/proguard-rules.pro` created (release build was failing without it)
-- [x] Feature graphic resized to exactly 1024×500
-- [x] Screenshots cropped to 1080×2160 (Play's max 2:1 aspect ratio)
+- [x] Feature graphic resized to exactly 1024x500
+- [x] Screenshots cropped to 1080x2160 (Play's max 2:1 aspect ratio)
 - [x] Backup rules (`dataExtractionRules` / `fullBackupContent`) — WiFi history excluded from cloud backup, consistent with the privacy policy
 - [x] App theme with dark-mode launch window (no more white flash)
 - [x] Themed (monochrome) launcher icon for Android 13+
 - [x] Widget picker preview + description
 - [x] Predictive back opt-in
 - [x] versionCode 3 / versionName 1.2
+- [x] Privacy policy verified live and corrected for accuracy
+- [x] Release-signed APK tested on a real device
 
 ## Play Console — one-time setup (manual)
-1. **Privacy policy URL** — the app and listing point to
-   `https://howarthtech.github.io/wifiAnalyze/store/privacy-policy.html`.
-   **Verify this URL loads in a browser before submitting.** If GitHub Pages isn't enabled
-   for the repo yet: repo Settings → Pages → deploy from `main`. Enter the URL in
-   *App content → Privacy policy*.
-2. **Location permissions declaration** (*App content → Sensitive app permissions*):
-   the app declares `ACCESS_FINE_LOCATION`. Declare it as **required for core functionality**:
-   "Android requires location permission for apps to scan WiFi networks. The app analyzes
-   WiFi signal strength and nearby networks. Location data itself is never collected,
-   stored, or shared." The in-app permission screen already shows a prominent disclosure.
-3. **Data safety form** (*App content → Data safety*):
-   - Data collected: **none** (all readings stay on the device; nothing is sent to the developer).
-   - Data shared: **none**.
-   - Note the app makes network requests to third parties when the user runs tests:
-     `speed.cloudflare.com` (speed test) and `8.8.8.8` (latency ping). No personal data is
-     transmitted — only generated test bytes. This matches the privacy policy.
-   - Security practices: data not encrypted in transit N/A (no user data transmitted);
-     users can delete data via "Clear All Saved Rooms" in Settings.
-4. **App category**: Tools. Content rating questionnaire: everyone, no sensitive content.
-5. **Store listing**: use `store/listing.md` (title/short/full description all within limits),
-   `store/icon-512.png`, `store/feature-graphic.png`, and the 7 screenshots in
-   `store/screenshots/`.
+
+### 1. Privacy policy URL — verified live
+`https://howarthtech.github.io/wifiAnalyze/store/privacy-policy.html`
+
+Confirmed serving (GitHub Pages, `main` branch root). Paste into
+*App content -> Privacy policy*. It was corrected in July 2026 to say **Precise** location
+(matching the `ACCESS_FINE_LOCATION` the manifest declares) and to disclose the latency
+test's ping to 8.8.8.8. Keep your Data safety answers consistent with it.
+
+### 2. Location permissions declaration
+*App content -> Sensitive app permissions -> Location*. The app declares
+`ACCESS_FINE_LOCATION`, so this form is mandatory.
+
+- Is location access required for core functionality? **Yes.**
+- Suggested wording:
+  > Android requires the location permission for any app to scan for nearby WiFi networks
+  > or read network names (SSIDs). WiFi Analyze uses it solely to display WiFi signal
+  > strength, nearby networks, and channel congestion. The app never requests, reads,
+  > stores, or transmits GPS coordinates, and location is not used for any other purpose.
+- Is it used in the background? **No** — foreground only. The background worker reads only
+  the already-connected network's signal.
+- The in-app permission screen already provides the prominent in-app disclosure Play requires.
+
+### 3. Data safety form
+*App content -> Data safety*.
+
+- **Does your app collect or share any of the required user data types? -> No.**
+  Everything (room readings, speed/latency history, preferences) is stored locally in Room
+  and DataStore, and nothing is transmitted to the developer.
+- **Is all data encrypted in transit?** The only outbound traffic is the user-initiated
+  speed test (HTTPS to Cloudflare) and the latency ping to 8.8.8.8. Neither carries user
+  data — only filler bytes and timing requests.
+- **Can users request data deletion?** Yes — Settings -> "Clear All Saved Rooms", or
+  uninstalling removes everything. There is no account and no server-side data.
+- Note: declaring a *permission* (location) is separate from *collecting* data. Requesting
+  location for WiFi scanning without recording it is correctly declared as "not collected."
+
+### 4. If Play asks about foreground services
+The merged manifest contains `FOREGROUND_SERVICE` and
+`androidx.work.impl.foreground.SystemForegroundService`. **These come from the WorkManager
+library, not from our code** — `SignalMonitorWorker` is a plain periodic `CoroutineWorker`
+that never calls `setForeground()`, and the work is never scheduled as expedited (see
+`WifiAnalyzeApp.scheduleBackgroundMonitoring`). No foreground service is ever started, so
+answer that the app does not use one. (Worth verifying, because a foreground service with no
+`foregroundServiceType` would crash on targetSdk 34+ if it ever did start.)
+
+### 5. App content questionnaires
+- **Category**: Tools. **Content rating**: Everyone — no user-generated content, no ads,
+  no purchases, no sensitive material.
+- **Ads**: contains no ads. **In-app purchases**: none. The "Buy Me a Pizza" button opens an
+  external browser link and is not a Play billing product.
+- **Target audience**: general / 18+ — not designed for children.
+- **Government app**: no. **Financial features**: none. **Data deletion URL**: not required
+  (no account system).
+
+### 6. Store listing
+Use `store/listing.md` for title, short and full description (all verified within Play's
+limits), plus `store/icon-512.png` (512x512), `store/feature-graphic.png` (1024x500), and
+the 7 screenshots in `store/screenshots/` (1080x2160, exactly 2:1). Release notes for v1.2
+are drafted at the bottom of `listing.md`.
+
+### 7. Release track
+Start with **Internal testing** to confirm the Play-signed build behaves like the local one,
+then promote to Production. Note that Play re-signs your upload with its own app signing key;
+the keystore you hold is the *upload* key.
 
 ## Known limitation — Wear OS app is NOT in this release
 The `:wear` module uses applicationId `com.wifianalyze.wear`, but Play requires a Wear app

@@ -32,7 +32,7 @@
 <body>
 
   <h1>Privacy Policy</h1>
-  <p class="subtitle">WiFi Analyze &nbsp;·&nbsp; Last updated: April 2026</p>
+  <p class="subtitle">WiFi Analyze &nbsp;·&nbsp; Last updated: July 2026</p>
 
   <div class="highlight">
     <strong>Short version:</strong> WiFi Analyze does not collect, store, or transmit any personal data.
@@ -74,9 +74,11 @@
   <h2>Permissions used</h2>
   <ul>
     <li>
-      <strong>Approximate Location</strong> — Required by Android to scan for nearby WiFi networks
-      and read network names (SSIDs). The app does not use your location for any other purpose
-      and does not store GPS coordinates.
+      <strong>Precise Location (ACCESS_FINE_LOCATION)</strong> — Required by Android to scan for
+      nearby WiFi networks and read network names (SSIDs). Android ties WiFi scanning to the
+      location permission because nearby networks can indicate where you are. The app itself
+      never requests, reads, stores, or transmits your GPS coordinates, and uses the permission
+      for no other purpose.
     </li>
     <li>
       <strong>Nearby Devices / WiFi State</strong> — Used to read your current WiFi connection
@@ -87,16 +89,31 @@
       you configure in Settings. No notifications are sent without your explicit opt-in.
     </li>
     <li>
-      <strong>Internet</strong> — Used only when you manually run a speed test (connects to
-      Cloudflare's speed test servers). Not used at any other time.
+      <strong>Internet</strong> — Used only when you manually run a speed test or a latency
+      test. Not used at any other time.
     </li>
   </ul>
 
   <h2>Third-party services</h2>
   <p>
-    The only external network request the app makes is the optional speed test, which contacts
-    <a href="https://speed.cloudflare.com" target="_blank">speed.cloudflare.com</a>.
-    Cloudflare's own privacy policy applies to that request.
+    The app makes external network requests only when you manually start one of these two tests:
+  </p>
+  <ul>
+    <li>
+      <strong>Speed test</strong> — downloads and uploads meaningless filler data to
+      <a href="https://speed.cloudflare.com" target="_blank">speed.cloudflare.com</a> to measure
+      throughput. No personal data is included in the request. Cloudflare's own privacy policy
+      applies.
+    </li>
+    <li>
+      <strong>Latency test</strong> — sends ping requests to your own router's gateway address
+      and to Google's public DNS resolver at 8.8.8.8 to measure round-trip time. Google's own
+      privacy policy applies to the request that reaches 8.8.8.8.
+    </li>
+  </ul>
+  <p>
+    The app makes no other network requests. Nothing is ever sent to a server operated by
+    the developer.
   </p>
   <p>
     The "Buy Me a Pizza" button opens
