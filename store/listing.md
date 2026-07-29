@@ -85,14 +85,55 @@ Dark navy (#0D47A1) background. Left side: large WiFi arc icon in white. Right s
 
 ---
 
-## What's New (Release Notes — v1.2)
-• Clear guidance when WiFi or Location Services are off, with one-tap fixes
-• Widget now shows "Not Connected" instead of stale data when WiFi drops
-• Signal alerts no longer repeat while the signal stays weak — one alert, one all-clear
-• Smarter scanning that works with Android's scan limits
-• Permission setup recovers gracefully from an accidental "Deny"
-• Friendlier speed test errors when there's no internet
-• Themed app icon (Android 13+), dark launch screen, widget picker preview
+## Release name (Play Console — internal only, not shown to users)
+```
+1.2 (3) — Initial release
+```
+Play defaults this to `3 (1.2)`. The label above is clearer in the releases list. Internal
+only; max 50 characters. For later updates use e.g. `1.3 (4) — Wear OS support`.
+
+---
+
+## Release notes — FIRST PUBLIC RELEASE (use this one)
+
+This app has never been on Play, so v1.2 is what users see first. Changelog-style notes
+("the widget no longer shows stale data") are meaningless to someone who has never used the
+app — describe what it *is* instead. Play limit: 500 characters per language.
+
+**Recommended (412 chars):**
+```
+Know your WiFi and fix your home network.
+
+See your signal in plain English, walk room to room to find dead spots, and get router placement tips based on your own readings. Check whether a spot is solid enough for smart home devices.
+
+Advanced mode adds dBm readings, channel congestion charts, speed and latency tests, and an A-F network score.
+
+Everything stays on your device. No account, no ads, no tracking.
+```
+
+**Shorter alternative (300 chars):**
+```
+See your WiFi signal in plain English, walk room to room to find dead spots, and get router placement tips from your own readings.
+
+Advanced mode adds dBm readings, channel analysis, speed and latency tests, and an A-F network score.
+
+No account, no ads, no tracking. Everything stays on your device.
+```
+
+---
+
+## Release notes — v1.2 changelog (save for the NEXT update, or if v1.1 was ever published)
+
+Only use this framing if users already have a previous version installed (458 chars):
+```
+- Clear guidance when WiFi or Location Services are off, with one-tap fixes
+- The widget now shows Not Connected instead of stale readings when WiFi drops
+- Weak-signal alerts no longer repeat: one alert, one all-clear
+- Smarter scanning that works within Android's scan limits
+- Permission setup recovers from an accidental Deny
+- Clearer speed test messages when there is no internet
+- Themed icon for Android 13+, dark launch screen, widget picker preview
+```
 
 ## What's New (Release Notes — v1.1)
 • Home screen widget with tap-to-open
