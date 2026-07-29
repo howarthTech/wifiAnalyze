@@ -49,9 +49,9 @@ WiFi Analyze gives you real-time intelligence about your wireless network — fr
 • Channel congestion alert (max once per day) when your channel is overcrowded
 
 **Privacy**
-• All data stays on your device
-• No account, no sign-up, no data collection
-• Nothing is uploaded or shared
+• Your readings stay on your device — nothing is sent to the developer
+• No account, no sign-up, no ads, no tracking, no analytics
+• The only network traffic is the speed and latency tests you start yourself
 
 ---
 
@@ -61,8 +61,28 @@ Tools
 ## Content Rating
 Everyone
 
-## Tags / Keywords
-wifi analyzer, wifi signal, network scanner, channel analyzer, signal strength, home network, wifi speed test, dead zone finder, router placement, wifi monitor
+## Tags (Play Console — max 5, chosen from Google's fixed list)
+
+Play does not accept free-text tags. You pick up to 5 from a predefined dropdown, so select
+the closest available match to each of these, in priority order:
+
+1. **Utilities / Tools** — the core category fit
+2. **Wi-Fi / Internet / Networking** — whichever network-related tag the list offers
+3. **Home automation / Smart home** — supports the IoT-readiness feature
+4. **Device information / System monitoring** — covers the dBm and diagnostics side
+5. **Productivity** — only if a fifth relevant option exists; leave blank rather than
+   picking something inaccurate
+
+Tags influence where Play surfaces the app in browse and "similar apps". An inaccurate tag
+puts the app in front of the wrong audience and tends to earn poor ratings, so fewer
+accurate tags beats five loose ones.
+
+## Keywords (NOT a Play Console field — for reference only)
+
+Play has no keyword field; discoverability comes from the title, short description, and full
+description text. These are the terms worth having naturally present in that copy:
+wifi analyzer, wifi signal, network scanner, channel analyzer, signal strength, home network,
+wifi speed test, dead zone finder, router placement, wifi monitor
 
 ---
 
