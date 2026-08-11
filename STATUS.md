@@ -4,7 +4,7 @@
 plain English, room-by-room dead-spot mapping, IoT readiness, plus an Advanced mode with
 dBm charts, channel analysis, speed/latency tests, and an A–F network score.
 
-**Current state:** `in build` → Play Store submission ready (v1.2, versionCode 5, targetSdk 36)
+**Current state:** `in build` → **submitted to Play, in review** (v1.2, versionCode 5, targetSdk 36, submitted 2026-08-11). Awaiting Google approval; goes `live` on approval.
 
 `Verify: $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat :app:assembleDebug :app:bundleRelease`
 
@@ -37,11 +37,11 @@ dBm charts, channel analysis, speed/latency tests, and an A–F network score.
 - Wear OS companion exists but is **not** in this release (wrong applicationId for Play
   co-distribution — see `store/RELEASE-CHECKLIST.md`).
 
-**What's next (all manual Play Console work — the code and assets are done):**
-1. Create the app in Play Console, complete the location declaration + Data safety form
-   using the prepared answers in `store/RELEASE-CHECKLIST.md`.
-2. Upload `app/build/outputs/bundle/release/app-release.aab` to Internal testing first,
-   then promote to Production.
+**What's next:**
+1. **Wait for Google review** (submitted 2026-08-11; org account, straight to Production).
+   Watch the Console "Publishing overview" + email for approval or a policy rejection.
+2. **On approval → mark `live`:** record the Play URL here, update the portfolio index row
+   (flag Chief of Staff), and drop the portfolio pack in `marketing/portfolio-inbox/wifianalyze/`.
 3. Later: Wear OS distribution (needs applicationId change + release signing), string
    resource extraction for localization.
 
