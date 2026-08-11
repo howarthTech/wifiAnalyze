@@ -75,18 +75,9 @@ Uploading versionCode 4 / targetSdk 36 clears the "update your target API level"
 
 ---
 
-## ⚠️ The one thing that can block Production: account type
+## Account type — resolved
 
-**Personal** Google Play developer accounts created after **13 Nov 2023** must run a
-**closed test with at least 12 testers opted in for 14 continuous days**, then apply for
-production access — before any production release is allowed. **Organization** accounts are
-exempt.
-
-- If Howarth Tech Solutions is registered as an **organization** account: ignore this;
-  go straight to Production after internal testing.
-- If it's a **personal** account: you'll route through **Closed testing** (not just
-  Internal), recruit 12 testers, wait out the 14 days, then apply for production access.
-  Plan for that lead time — it's a Google gate, not a config you can skip.
-
-Check under **Setup → (account) / Users and permissions** or the account details which type
-you have if you're unsure.
+Confirmed **organization** account (Howarth Tech Solutions), so the 12-tester / 14-day
+closed-testing requirement that applies to post-2023 personal accounts **does not apply**.
+Cleared to go straight to Production. (The first production release still passes through
+Google's standard content review — typically hours to a couple of days.)
