@@ -6,10 +6,10 @@
 | **App name** | WiFi Analyze |
 | **Package** | `com.wifianalyze` |
 | **Version name** | 1.2 |
-| **Version code** | 3 |
-| **Release name (internal)** | `1.2 (3) — Initial release` |
-| **Min / Target SDK** | 33 (Android 13) / 35 (Android 15) |
-| **Upload artifact** | `app/build/outputs/bundle/release/WiFi-Analyze-v1.2-upload.aab` (4.98 MB, signed) |
+| **Version code** | 4 |
+| **Release name (internal)** | `1.2 (4) — Initial release` |
+| **Min / Target SDK** | 33 (Android 13) / 36 (Android 16) |
+| **Upload artifact** | `app/build/outputs/bundle/release/WiFi-Analyze-v1.2-upload.aab` (signed) |
 | **Status** | First public release — nothing previously on Play |
 | **Track** | Start on Internal testing, then promote to Production |
 
@@ -56,8 +56,14 @@ Everything stays on your device. No account, no ads, no tracking.
 - Play readiness: backup rules, dark launch theme, themed icon, widget preview,
   predictive back, corrected privacy policy + listing (precise location, latency
   disclosure), store assets resized to spec
+- **targetSdk raised 35 → 36 (Android 16)** to satisfy Play's annual target-API
+  requirement (action-by-Aug-31-2026 notice); versionCode bumped 3 → 4
 
-**Testing:** Release-signed APK installed and verified on a physical device.
+**Testing:** Release-signed APK (versionCode 3, targetSdk 35) installed and verified on a
+physical device. The targetSdk-36 rebuild (versionCode 4) is behaviorally identical — the
+only Android 16 change that affects this app is edge-to-edge enforcement, which was already
+handled and already in force at targetSdk 35. Re-run a quick device smoke test of the new
+APK before promoting to Production.
 
 ---
 
@@ -66,6 +72,6 @@ Everything stays on your device. No account, no ads, no tracking.
   share the phone listing, and it lacks release signing. Documented for a later release.
 
 ## Next release checklist
-- [ ] Bump `versionCode` (→4) and `versionName` in `app/build.gradle.kts`
+- [ ] Bump `versionCode` (→5) and `versionName` in `app/build.gradle.kts`
 - [ ] Use the changelog-style notes (saved in `listing.md`) — users now have a prior version
 - [ ] Rebuild AAB, upload, update release notes

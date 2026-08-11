@@ -4,13 +4,19 @@
 plain English, room-by-room dead-spot mapping, IoT readiness, plus an Advanced mode with
 dBm charts, channel analysis, speed/latency tests, and an A–F network score.
 
-**Current state:** `in build` → Play Store submission ready (v1.2, versionCode 3)
+**Current state:** `in build` → Play Store submission ready (v1.2, versionCode 4, targetSdk 36)
 
 `Verify: $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat :app:assembleDebug :app:bundleRelease`
 
 **Live URL:** not yet published — pending first Play Store submission
 
-**Where things stand (2026-07-28):**
+**Where things stand (2026-08-11):**
+- Play Console flagged the annual target-API requirement (action by 2026-08-31): raised
+  `targetSdk` 35 → 36 (Android 16) in both app and wear modules, bumped versionCode 3 → 4.
+  compileSdk was already 36 so no toolchain change; the only Android 16 behavior change
+  touching this app (edge-to-edge) was already handled. Rebuilt signed AAB.
+
+**Earlier (2026-07-28):**
 - v1.2 tested on a real device from the release-signed APK — works.
 - Privacy policy verified live at
   `https://howarthtech.github.io/wifiAnalyze/store/privacy-policy.html`, and corrected:

@@ -1,4 +1,4 @@
-# Play Store Release Checklist — WiFi Analyze v1.2 (versionCode 3)
+# Play Store Release Checklist — WiFi Analyze v1.2 (versionCode 4, targetSdk 36)
 
 ## Build the upload artifact
 ```powershell
@@ -18,9 +18,10 @@ up somewhere safe**; losing it means you can never update the app).
 - [x] Themed (monochrome) launcher icon for Android 13+
 - [x] Widget picker preview + description
 - [x] Predictive back opt-in
-- [x] versionCode 3 / versionName 1.2
+- [x] targetSdk 36 (Android 16) — satisfies Play's annual target-API requirement
+- [x] versionCode 4 / versionName 1.2
 - [x] Privacy policy verified live and corrected for accuracy
-- [x] Release-signed APK tested on a real device
+- [x] Release-signed APK tested on a real device (v3/target-35; re-smoke the v4/target-36 build)
 
 ## Play Console — one-time setup (manual)
 

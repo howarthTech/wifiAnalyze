@@ -21,8 +21,8 @@ android {
     defaultConfig {
         applicationId = "com.wifianalyze"
         minSdk = 33
-        targetSdk = 35
-        versionCode = 3
+        targetSdk = 36
+        versionCode = 4
         versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

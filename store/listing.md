@@ -107,10 +107,10 @@ Dark navy (#0D47A1) background. Left side: large WiFi arc icon in white. Right s
 
 ## Release name (Play Console — internal only, not shown to users)
 ```
-1.2 (3) — Initial release
+1.2 (4) — Initial release
 ```
-Play defaults this to `3 (1.2)`. The label above is clearer in the releases list. Internal
-only; max 50 characters. For later updates use e.g. `1.3 (4) — Wear OS support`.
+Play defaults this to `4 (1.2)`. The label above is clearer in the releases list. Internal
+only; max 50 characters. For later updates use e.g. `1.3 (5) — Wear OS support`.
 
 ---
 
