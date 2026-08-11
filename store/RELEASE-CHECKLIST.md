@@ -1,4 +1,4 @@
-# Play Store Release Checklist — WiFi Analyze v1.2 (versionCode 4, targetSdk 36)
+# Play Store Release Checklist — WiFi Analyze v1.2 (versionCode 5, targetSdk 36)
 
 ## Build the upload artifact
 ```powershell
@@ -19,7 +19,7 @@ up somewhere safe**; losing it means you can never update the app).
 - [x] Widget picker preview + description
 - [x] Predictive back opt-in
 - [x] targetSdk 36 (Android 16) — satisfies Play's annual target-API requirement
-- [x] versionCode 4 / versionName 1.2
+- [x] versionCode 5 / versionName 1.2 (codes 3 and 4 were consumed by earlier uploads)
 - [x] Privacy policy verified live and corrected for accuracy
 - [x] Release-signed APK tested on a real device (v3/target-35; re-smoke the v4/target-36 build)
 

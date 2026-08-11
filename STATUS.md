@@ -4,7 +4,7 @@
 plain English, room-by-room dead-spot mapping, IoT readiness, plus an Advanced mode with
 dBm charts, channel analysis, speed/latency tests, and an A–F network score.
 
-**Current state:** `in build` → Play Store submission ready (v1.2, versionCode 4, targetSdk 36)
+**Current state:** `in build` → Play Store submission ready (v1.2, versionCode 5, targetSdk 36)
 
 `Verify: $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat :app:assembleDebug :app:bundleRelease`
 

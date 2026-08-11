@@ -6,8 +6,8 @@
 | **App name** | WiFi Analyze |
 | **Package** | `com.wifianalyze` |
 | **Version name** | 1.2 |
-| **Version code** | 4 |
-| **Release name (internal)** | `1.2 (4) — Initial release` |
+| **Version code** | 5 |
+| **Release name (internal)** | `1.2 (5) — Initial release` |
 | **Min / Target SDK** | 33 (Android 13) / 36 (Android 16) |
 | **Upload artifact** | `app/build/outputs/bundle/release/WiFi-Analyze-v1.2-upload.aab` (signed) |
 | **Status** | First public release — nothing previously on Play |
@@ -57,7 +57,8 @@ Everything stays on your device. No account, no ads, no tracking.
   predictive back, corrected privacy policy + listing (precise location, latency
   disclosure), store assets resized to spec
 - **targetSdk raised 35 → 36 (Android 16)** to satisfy Play's annual target-API
-  requirement (action-by-Aug-31-2026 notice); versionCode bumped 3 → 4
+  requirement (action-by-Aug-31-2026 notice); versionCode is now 5 (3 and 4 were
+  consumed by earlier uploads — Play reserves a versionCode permanently once uploaded)
 
 **Testing:** Release-signed APK (versionCode 3, targetSdk 35) installed and verified on a
 physical device. The targetSdk-36 rebuild (versionCode 4) is behaviorally identical — the

@@ -5,7 +5,13 @@ This file is the **click path**. Play Console reorganizes its menus often — if
 below doesn't match, use the search bar at the top of the Console.
 
 Upload artifact: `app/build/outputs/bundle/release/WiFi-Analyze-v1.2-upload.aab`
-(versionCode 4, versionName 1.2, targetSdk 36 — verified).
+(versionCode 5, versionName 1.2, targetSdk 36 — verified).
+
+> **"Version code N has already been used"** on upload means that code was already
+> uploaded to your account (a draft or a test track) — Play reserves it forever. Either
+> attach the existing build via **Add from library** instead of uploading, or bump
+> `versionCode` in `app/build.gradle.kts`, rebuild, and upload the new file. Codes 3 and 4
+> were consumed this way; the current build is **5**.
 
 ---
 
@@ -58,7 +64,7 @@ be reset via support; see the key-backup README).
 ### Recommended path: test track first
 1. Left nav **Test and release → Testing → Internal testing → Create new release**.
 2. Upload `WiFi-Analyze-v1.2-upload.aab`.
-3. Release name: set to `1.2 (4) — Initial release` (or leave Play's `4 (1.2)`).
+3. Release name: set to `1.2 (5) — Initial release` (or leave Play's `5 (1.2)`).
 4. Release notes: paste the `<en-US>…</en-US>` block from `RELEASE-CHECKLIST`/`RELEASE-NOTES`.
 5. **Next → Save → Review release → Start rollout to Internal testing.**
 6. On the Internal testing **Testers** tab, add tester emails and share the opt-in link;
@@ -66,12 +72,12 @@ be reset via support; see the key-backup README).
 
 ### Promote to Production
 1. **Test and release → Production → Create release** (or "Promote" the internal release).
-2. Confirm the same AAB (versionCode 4) is attached; keep the release notes.
+2. Confirm the same AAB (versionCode 5) is attached; keep the release notes.
 3. Select countries/regions (all, or your choice).
 4. **Review release → Start rollout to Production.**
 5. First production release goes to Google **review** — hours to a few days.
 
-Uploading versionCode 4 / targetSdk 36 clears the "update your target API level" warning.
+Uploading versionCode 5 / targetSdk 36 clears the "update your target API level" warning.
 
 ---
 
