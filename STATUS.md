@@ -4,13 +4,18 @@
 plain English, room-by-room dead-spot mapping, IoT readiness, plus an Advanced mode with
 dBm charts, channel analysis, speed/latency tests, and an A–F network score.
 
-**Current state:** `in build` → **submitted to Play, in review** (v1.2, versionCode 5, targetSdk 36, submitted 2026-08-11). Awaiting Google approval; goes `live` on approval.
+**Current state:** `live` — **published on Google Play** 2026-08-12 (v1.2, versionCode 5, targetSdk 36).
+
+**Live URL:** https://play.google.com/store/apps/details?id=com.wifianalyze
 
 `Verify: $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"; .\gradlew.bat :app:assembleDebug :app:bundleRelease`
 
-**Live URL:** not yet published — pending first Play Store submission
+**Where things stand (2026-08-12):**
+- **Published on Google Play** — listing live and verified (HTTP 200). First HTS
+  first-party product to ship to a store. Portfolio pack flipped to `ready`; Chief of
+  Staff pinged to move the portfolio index row to `live`.
 
-**Where things stand (2026-08-11):**
+**Earlier (2026-08-11):**
 - Play Console flagged the annual target-API requirement (action by 2026-08-31): raised
   `targetSdk` 35 → 36 (Android 16) in both app and wear modules, bumped versionCode 3 → 4.
   compileSdk was already 36 so no toolchain change; the only Android 16 behavior change
@@ -38,11 +43,13 @@ dBm charts, channel analysis, speed/latency tests, and an A–F network score.
   co-distribution — see `store/RELEASE-CHECKLIST.md`).
 
 **What's next:**
-1. **Wait for Google review** (submitted 2026-08-11; org account, straight to Production).
-   Watch the Console "Publishing overview" + email for approval or a policy rejection.
-2. **On approval → mark `live`:** record the Play URL here, update the portfolio index row
-   (flag Chief of Staff), and drop the portfolio pack in `marketing/portfolio-inbox/wifianalyze/`.
-3. Later: Wear OS distribution (needs applicationId change + release signing), string
+1. **Watch post-launch:** first-day installs, crash/ANR rate in Play Console (Android vitals),
+   and any early reviews. Address crashes fast — a new listing is fragile.
+2. Confirm the Chief of Staff has moved the portfolio index row to `live`, and the
+   Portal/Marketing dev has integrated the pack onto howarth.tech.
+3. Recapture a real **router-placement screenshot** (the store one was a duplicate of the
+   room-list shot) and swap it into the Play listing + portfolio gallery.
+4. Later: Wear OS distribution (needs applicationId change + release signing), string
    resource extraction for localization.
 
 **Money:** free app with a "Buy Me a Pizza" link — no tracker needed until revenue exists.
